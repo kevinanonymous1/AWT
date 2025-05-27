@@ -1,0 +1,2 @@
+C:\Users\chalk\source\repos\Practical_14\Practical_14\obj\Debug\Practical_14.csproj.AssemblyReference.cache
+C:\Users\chalk\source\repos\Practical_14\Practical_14\obj\Debug\Practical_14.csproj.CoreCompileInputs.cache
