@@ -1,0 +1,130 @@
+ Step 1: Create a New Web Forms Project
+Open Visual Studio
+
+File → New → Project
+
+Choose: ASP.NET Web Application (.NET Framework)
+
+Name it: ClientSessionDemo → Click OK
+
+Select Web Forms → Click Create
+
+🔹 Step 2: Add Two Web Forms
+Login.aspx – for input
+
+Welcome.aspx – for displaying stored data
+
+🔹 Step 3: Design Login.aspx
+aspx
+Copy
+Edit
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Login.aspx.cs" Inherits="ClientSessionDemo.Login" %>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Page</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div style="margin: 30px;">
+            <h2>Login</h2>
+            <asp:Label ID="lblName" runat="server" Text="Enter Your Name: " />
+            <asp:TextBox ID="txtName" runat="server" />
+            <br /><br />
+
+            <asp:RadioButtonList ID="rblMethod" runat="server">
+                <asp:ListItem Value="cookie" Text="Use Cookie" Selected="True" />
+                <asp:ListItem Value="query" Text="Use Query String" />
+            </asp:RadioButtonList>
+
+            <br />
+            <asp:Button ID="btnSubmit" runat="server" Text="Submit" OnClick="btnSubmit_Click" />
+        </div>
+    </form>
+</body>
+</html>
+🔹 Step 4: Code-Behind Login.aspx.cs
+csharp
+Copy
+Edit
+using System;
+using System.Web;
+
+namespace ClientSessionDemo
+{
+    public partial class Login : System.Web.UI.Page
+    {
+        protected void btnSubmit_Click(object sender, EventArgs e)
+        {
+            string name = txtName.Text.Trim();
+            string method = rblMethod.SelectedValue;
+
+            if (method == "cookie")
+            {
+                HttpCookie userCookie = new HttpCookie("UserName", name);
+                userCookie.Expires = DateTime.Now.AddMinutes(5); // Valid for 5 mins
+                Response.Cookies.Add(userCookie);
+                Response.Redirect("Welcome.aspx");
+            }
+            else if (method == "query")
+            {
+                Response.Redirect("Welcome.aspx?name=" + Server.UrlEncode(name));
+            }
+        }
+    }
+}
+🔹 Step 5: Design Welcome.aspx
+aspx
+Copy
+Edit
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Welcome.aspx.cs" Inherits="ClientSessionDemo.Welcome" %>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome Page</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div style="margin: 30px;">
+            <h2><asp:Label ID="lblGreeting" runat="server" Text="Welcome!" /></h2>
+        </div>
+    </form>
+</body>
+</html>
+🔹 Step 6: Code-Behind Welcome.aspx.cs
+csharp
+Copy
+Edit
+using System;
+using System.Web;
+
+namespace ClientSessionDemo
+{
+    public partial class Welcome : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            string name = "";
+
+            if (Request.Cookies["UserName"] != null)
+            {
+                name = Request.Cookies["UserName"].Value;
+            }
+            else if (Request.QueryString["name"] != null)
+            {
+                name = Request.QueryString["name"];
+            }
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                lblGreeting.Text = "Welcome, " + name + "!";
+            }
+            else
+            {
+                lblGreeting.Text = "No session data found.";
+            }
+        }
+    }
+}

@@ -1,0 +1,112 @@
+ Step 1: Create a Table and Stored Procedure in SQL Server
+Open SQL Server Management Studio (or Visual Studio > Server Explorer > Database), and run:
+
+sql
+Copy
+Edit
+-- Create table
+CREATE TABLE Employee (
+    EmpID INT PRIMARY KEY,
+    EmpName NVARCHAR(100),
+    Department NVARCHAR(50),
+    Salary INT
+);
+
+-- Insert sample data
+INSERT INTO Employee VALUES (1, 'Yash Chalke', 'IT', 50000);
+INSERT INTO Employee VALUES (2, 'Priya Mehta', 'HR', 45000);
+INSERT INTO Employee VALUES (3, 'Ravi Desai', 'Finance', 55000);
+
+-- Create stored procedure to get employees by department
+CREATE PROCEDURE GetEmployeesByDepartment
+    @Dept NVARCHAR(50)
+AS
+BEGIN
+    SELECT * FROM Employee WHERE Department = @Dept
+END
+🔹 Step 2: Create a New Web Forms Project in Visual Studio
+Open Visual Studio.
+
+File → New → Project → ASP.NET Web Application (.NET Framework)
+
+Name it: StoredProcedureDemo
+
+Select Web Forms → Click Create
+
+🔹 Step 3: Add Connection String to Web.config
+Open Web.config, and inside <configuration>, add:
+
+xml
+Copy
+Edit
+<connectionStrings>
+  <add name="MyConnection"
+       connectionString="Data Source=.;Initial Catalog=YourDatabaseName;Integrated Security=True"
+       providerName="System.Data.SqlClient" />
+</connectionStrings>
+✅ Replace YourDatabaseName with your actual DB name.
+
+🔹 Step 4: Design the WebForm (Default.aspx)
+Open Default.aspx and add:
+
+aspx
+Copy
+Edit
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="StoredProcedureDemo.Default" %>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stored Procedure Demo</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div>
+            <h2>Search Employees by Department</h2>
+            Department:
+            <asp:TextBox ID="txtDepartment" runat="server" />
+            <asp:Button ID="btnSearch" runat="server" Text="Search" OnClick="btnSearch_Click" />
+            <br /><br />
+
+            <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="true" />
+        </div>
+    </form>
+</body>
+</html>
+🔹 Step 5: Write Code in CodeBehind (Default.aspx.cs)
+Open Default.aspx.cs and write:
+
+csharp
+Copy
+Edit
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+
+namespace StoredProcedureDemo
+{
+    public partial class Default : System.Web.UI.Page
+    {
+        string connStr = ConfigurationManager.ConnectionStrings["MyConnection"].ConnectionString;
+
+        protected void btnSearch_Click(object sender, EventArgs e)
+        {
+            string dept = txtDepartment.Text;
+
+            using (SqlConnection con = new SqlConnection(connStr))
+            {
+                SqlCommand cmd = new SqlCommand("GetEmployeesByDepartment", con);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.AddWithValue("@Dept", dept);
+
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+
+                GridView1.DataSource = dt;
+                GridView1.DataBind();
+            }
+        }
+    }
+}
